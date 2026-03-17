@@ -77,13 +77,26 @@ elif mode == "Edit Data Manually":
         st.success("Data Saved!")
 
 # --- MODE 3: VIEW DASHBOARD ---
+# --- MODE 3: VIEW DASHBOARD ---
 else:
     # 1. KPI Top Row
-    cols = st.columns(len(df))
-    for i, row in df.iterrows():
-        cols[i].metric(label=row['Metric'], value=row['Value'], help=f"Target: {row['Target']}")
+    # We filter out any rows where 'Metric' might be empty to prevent errors
+    display_df = df.dropna(subset=['Metric']) 
+    
+    if not display_df.empty:
+        cols = st.columns(len(display_df))
+        for i, (idx, row) in enumerate(display_df.iterrows()):
+            # Using str() ensures the label and value are treated as text by Streamlit
+            cols[i].metric(
+                label=str(row['Metric']), 
+                value=str(row['Value']), 
+                help=f"Target: {str(row['Target'])}"
+            )
+    else:
+        st.warning("No KPI data found. Please go to 'Edit Data' to add metrics.")
 
     st.divider()
+    # ... (rest of your chart code remains the same)
 
     # 2. Charts Row 1
     col1, col2 = st.columns(2)
